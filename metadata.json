@@ -1,0 +1,6 @@
+{
+  "name": "Classic Yatzy",
+  "description": "Play classic Yatzy with digital dice rolling or track scores for physical dice with 1 to 4 players, smart category recommendations, and responsive scorecards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
