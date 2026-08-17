@@ -1,0 +1,40 @@
+{
+  "name": "Classic Yatzy",
+  "short_name": "Yatzy",
+  "description": "Play classic Yatzy with digital dice rolling or track scores for physical dice.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#059669",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment", "board-games"],
+  "shortcuts": [
+    {
+      "name": "Nueva Partida",
+      "short_name": "Jugar",
+      "description": "Iniciar una nueva partida de Yatzy",
+      "url": "./"
+    }
+  ]
+}

@@ -105,6 +105,53 @@ export default function App() {
   // Flag to avoid overwriting during initial mount check
   const [hasLoadedInitialStorage, setHasLoadedInitialStorage] = useState<boolean>(false);
 
+  // PWA Installation & Standalone State
+  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<any>(null);
+  const [isStandaloneApp, setIsStandaloneApp] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true
+      );
+    }
+    return false;
+  });
+
+  // Capture PWA beforeinstallprompt event
+  useEffect(() => {
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setDeferredInstallPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setDeferredInstallPrompt(null);
+      setIsStandaloneApp(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallPWA = async () => {
+    if (deferredInstallPrompt) {
+      try {
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+        if (choice.outcome === 'accepted') {
+          setDeferredInstallPrompt(null);
+        }
+      } catch (err) {
+        console.error('Error launching PWA install prompt:', err);
+      }
+    }
+  };
+
   // 1. Initial Mount: Load saved game or launch setup if no active game found
   useEffect(() => {
     try {
@@ -714,6 +761,9 @@ export default function App() {
         soundEnabled={soundEnabled}
         smartRecommendations={smartRecommendations}
         historyCount={history.length}
+        installPromptAvailable={Boolean(deferredInstallPrompt)}
+        isStandalone={isStandaloneApp}
+        onInstallApp={handleInstallPWA}
         onClose={() => setShowSettingsModal(false)}
         onSelectMode={(newMode) => setMode(newMode)}
         onSelectTheme={(newTheme) => setTheme(newTheme)}

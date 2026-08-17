@@ -16,6 +16,9 @@ import {
   Trash2,
   BookmarkCheck,
   BookOpen,
+  Download,
+  Smartphone,
+  CheckCircle2,
 } from 'lucide-react';
 import { GameMode, AppTheme } from '../types';
 
@@ -26,6 +29,9 @@ interface SettingsModalProps {
   soundEnabled: boolean;
   smartRecommendations: boolean;
   historyCount?: number;
+  installPromptAvailable?: boolean;
+  isStandalone?: boolean;
+  onInstallApp?: () => void;
   onClose: () => void;
   onSelectMode: (mode: GameMode) => void;
   onSelectTheme: (theme: AppTheme) => void;
@@ -44,6 +50,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   soundEnabled,
   smartRecommendations,
   historyCount = 0,
+  installPromptAvailable = false,
+  isStandalone = false,
+  onInstallApp,
   onClose,
   onSelectMode,
   onSelectTheme,
@@ -153,6 +162,41 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </button>
             </div>
           </div>
+
+          {/* PWA Install Action Card */}
+          {installPromptAvailable && onInstallApp && (
+            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-600 text-white shadow-xs">
+                  <Download className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>Instalar Aplicación (PWA)</span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                    Instala Yatzy en tu móvil u ordenador para jugar offline a pantalla completa.
+                  </p>
+                </div>
+              </div>
+              <button
+                id="btn-settings-install-pwa"
+                type="button"
+                onClick={onInstallApp}
+                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>Instalar</span>
+              </button>
+            </div>
+          )}
+
+          {isStandalone && (
+            <div className="px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300 font-semibold">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>Modo App Instalada (PWA Offline Activado)</span>
+            </div>
+          )}
 
           {/* 1. Game Mode */}
           <div className="flex flex-col gap-2">

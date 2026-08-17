@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b" />
+      <stop offset="50%" stop-color="#065f46" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="dieGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#e2e8f0" />
+    </linearGradient>
+    <linearGradient id="dieGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#000000" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Background with smooth rounded corners -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  
+  <!-- Subtle decorative ring -->
+  <circle cx="256" cy="256" r="220" fill="none" stroke="#10b981" stroke-width="3" stroke-opacity="0.2" stroke-dasharray="12 12" />
+
+  <!-- Background Die (Angled slightly) -->
+  <g transform="translate(180, 240) rotate(-15) translate(-100, -100)" filter="url(#shadow)">
+    <rect x="0" y="0" width="200" height="200" rx="36" fill="url(#dieGrad1)" stroke="#cbd5e1" stroke-width="4" />
+    <!-- 5 Pips (Die 5) -->
+    <!-- Top Left -->
+    <circle cx="50" cy="50" r="16" fill="#1e293b" />
+    <!-- Top Right -->
+    <circle cx="150" cy="50" r="16" fill="#1e293b" />
+    <!-- Center -->
+    <circle cx="100" cy="100" r="16" fill="#e11d48" />
+    <!-- Bottom Left -->
+    <circle cx="50" cy="150" r="16" fill="#1e293b" />
+    <!-- Bottom Right -->
+    <circle cx="150" cy="150" r="16" fill="#1e293b" />
+  </g>
+
+  <!-- Foreground Die (Gold Yatzy Die with 6 Pips) -->
+  <g transform="translate(320, 290) rotate(12) translate(-95, -95)" filter="url(#shadow)">
+    <rect x="0" y="0" width="190" height="190" rx="36" fill="url(#dieGrad2)" stroke="#fbbf24" stroke-width="4" />
+    <!-- 6 Pips -->
+    <!-- Left Column -->
+    <circle cx="50" cy="45" r="15" fill="#78350f" />
+    <circle cx="50" cy="95" r="15" fill="#78350f" />
+    <circle cx="50" cy="145" r="15" fill="#78350f" />
+    <!-- Right Column -->
+    <circle cx="140" cy="45" r="15" fill="#78350f" />
+    <circle cx="140" cy="95" r="15" fill="#78350f" />
+    <circle cx="140" cy="145" r="15" fill="#78350f" />
+  </g>
+
+  <!-- Sparkles / Stars -->
+  <path d="M 120 110 Q 120 135 95 135 Q 120 135 120 160 Q 120 135 145 135 Q 120 135 120 110 Z" fill="#fbbf24" opacity="0.9" />
+  <path d="M 400 130 Q 400 148 382 148 Q 400 148 400 166 Q 400 148 418 148 Q 400 148 400 130 Z" fill="#34d399" opacity="0.8" />
+  <circle cx="430" cy="200" r="5" fill="#fef08a" />
+</svg>
