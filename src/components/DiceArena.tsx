@@ -20,6 +20,8 @@ interface DiceArenaProps {
   onScoreCategory: (category: Category) => void;
   onHoldAll?: () => void;
   onClearHolds?: () => void;
+  isScoringOptionsCollapsed?: boolean;
+  onToggleScoringOptionsCollapsed?: () => void;
 }
 
 export const DiceArena: React.FC<DiceArenaProps> = ({
@@ -33,6 +35,8 @@ export const DiceArena: React.FC<DiceArenaProps> = ({
   onToggleHold,
   onRollDice,
   onScoreCategory,
+  isScoringOptionsCollapsed = true,
+  onToggleScoringOptionsCollapsed,
 }) => {
   const isFirstRoll = rollsLeft === 3;
   const canRoll = rollsLeft > 0 && !isRolling;
@@ -115,6 +119,8 @@ export const DiceArena: React.FC<DiceArenaProps> = ({
           dice={dice}
           onScoreCategory={(cat) => onScoreCategory(cat)}
           smartRecommendations={smartRecommendations}
+          isCollapsed={isScoringOptionsCollapsed}
+          onToggleCollapse={onToggleScoringOptionsCollapsed}
         />
       )}
     </div>

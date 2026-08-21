@@ -79,6 +79,7 @@ export default function App() {
   const [rollsLeft, setRollsLeft] = useState<number>(3);
   const [isRolling, setIsRolling] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [isScoringOptionsCollapsed, setIsScoringOptionsCollapsed] = useState<boolean>(true);
 
   // Synchronized Physical Dice Tracker State (shared between mat & modal)
   const [physicalDice, setPhysicalDice] = useState<number[]>([1, 2, 3, 4, 5]);
@@ -598,6 +599,8 @@ export default function App() {
                 onToggleHold={handleToggleHold}
                 onRollDice={handleRollDice}
                 onScoreCategory={handleSelectScorecardCategory}
+                isScoringOptionsCollapsed={isScoringOptionsCollapsed}
+                onToggleScoringOptionsCollapsed={() => setIsScoringOptionsCollapsed((prev) => !prev)}
               />
             </div>
 
