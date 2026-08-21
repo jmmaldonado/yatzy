@@ -79,6 +79,7 @@ export default function App() {
   const [rollsLeft, setRollsLeft] = useState<number>(3);
   const [isRolling, setIsRolling] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [isScoringOptionsCollapsed, setIsScoringOptionsCollapsed] = useState<boolean>(true);
 
   // Synchronized Physical Dice Tracker State (shared between mat & modal)
   const [physicalDice, setPhysicalDice] = useState<number[]>([1, 2, 3, 4, 5]);
@@ -276,18 +277,6 @@ export default function App() {
     },
     [rollsLeft, isRolling]
   );
-
-  const handleHoldAll = useCallback(() => {
-    if (rollsLeft === 3 || rollsLeft === 0 || isRolling) return;
-    setHeld([true, true, true, true, true]);
-    sound.playHoldToggle(true);
-  }, [rollsLeft, isRolling]);
-
-  const handleClearHolds = useCallback(() => {
-    if (rollsLeft === 3 || isRolling) return;
-    setHeld([false, false, false, false, false]);
-    sound.playHoldToggle(false);
-  }, [rollsLeft, isRolling]);
 
   // Advance turn to next player / next round
   const advanceTurn = (updatedPlayers: Player[]) => {
@@ -562,7 +551,10 @@ export default function App() {
       {/* Streamlined Header Bar */}
       <Header
         round={round}
-        activePlayer={activePlayer}
+        players={players}
+        currentPlayerIndex={currentPlayerIndex}
+        rollsLeft={rollsLeft}
+        mode={mode}
         historyCount={history.length}
         canUndo={undoStack.length > 0}
         onUndo={handleUndo}
@@ -607,8 +599,8 @@ export default function App() {
                 onToggleHold={handleToggleHold}
                 onRollDice={handleRollDice}
                 onScoreCategory={handleSelectScorecardCategory}
-                onHoldAll={handleHoldAll}
-                onClearHolds={handleClearHolds}
+                isScoringOptionsCollapsed={isScoringOptionsCollapsed}
+                onToggleScoringOptionsCollapsed={() => setIsScoringOptionsCollapsed((prev) => !prev)}
               />
             </div>
 
@@ -632,15 +624,15 @@ export default function App() {
           <div className="flex flex-col gap-4">
             {/* Top Toolbar for Physical Mode with Optional Mat Toggle */}
             <div className="flex items-center justify-between gap-3 px-1">
-              <div className="text-xs sm:text-sm text-white/80 font-medium">
-                🎲 Tira los dados reales en tu mesa y pulsa <strong className="text-emerald-300 font-bold">+ Anotar</strong> en cualquier casilla.
+              <div className="text-xs sm:text-sm dark:text-white/80 font-medium">
+                🎲 Tira los dados reales en tu mesa y pulsa <strong className="text-emerald-600 dark:text-emerald-300 font-bold">+ Anotar</strong> en cualquier casilla.
               </div>
 
               <button
                 id="btn-toggle-physical-mat"
                 type="button"
                 onClick={() => setShowPhysicalSidePanel((prev) => !prev)}
-                className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-white/15 shrink-0"
+                className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 dark:text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-black/15 dark:border-white/15 shrink-0"
                 title="Mostrar/ocultar tapete auxiliar de dados"
               >
                 {showPhysicalSidePanel ? (
@@ -651,7 +643,7 @@ export default function App() {
                 ) : (
                   <>
                     <Eye className="w-3.5 h-3.5" />
-                    <span>Mostrar Tapete Auxiliar</span>
+                    <span>Mostrar Tapete</span>
                   </>
                 )}
               </button>
