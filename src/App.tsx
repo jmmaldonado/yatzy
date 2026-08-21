@@ -624,15 +624,15 @@ export default function App() {
           <div className="flex flex-col gap-4">
             {/* Top Toolbar for Physical Mode with Optional Mat Toggle */}
             <div className="flex items-center justify-between gap-3 px-1">
-              <div className="text-xs sm:text-sm text-white/80 font-medium">
-                🎲 Tira los dados reales en tu mesa y pulsa <strong className="text-emerald-300 font-bold">+ Anotar</strong> en cualquier casilla.
+              <div className="text-xs sm:text-sm dark:text-white/80 font-medium">
+                🎲 Tira los dados reales en tu mesa y pulsa <strong className="text-emerald-600 dark:text-emerald-300 font-bold">+ Anotar</strong> en cualquier casilla.
               </div>
 
               <button
                 id="btn-toggle-physical-mat"
                 type="button"
                 onClick={() => setShowPhysicalSidePanel((prev) => !prev)}
-                className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-white/15 shrink-0"
+                className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 dark:text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-black/15 dark:border-white/15 shrink-0"
                 title="Mostrar/ocultar tapete auxiliar de dados"
               >
                 {showPhysicalSidePanel ? (
@@ -643,7 +643,7 @@ export default function App() {
                 ) : (
                   <>
                     <Eye className="w-3.5 h-3.5" />
-                    <span>Mostrar Tapete Auxiliar</span>
+                    <span>Mostrar Tapete</span>
                   </>
                 )}
               </button>

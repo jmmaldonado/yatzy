@@ -259,8 +259,6 @@ export const ScoringOptionsList: React.FC<ScoringOptionsListProps> = ({
                       <span className="font-semibold text-slate-500 dark:text-slate-400">
                         Máx: <strong className="text-slate-700 dark:text-slate-300">{opt.maxScore} pts</strong>
                       </span>
-                      <span>•</span>
-                      <span className="truncate">{opt.cat.section === 'upper' ? 'Sección Superior' : 'Sección Inferior'}</span>
                     </div>
                   </div>
                 </div>

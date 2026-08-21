@@ -146,8 +146,7 @@ export const Scorecard: React.FC<ScorecardProps> = ({
                       className="inline-flex items-center justify-center gap-1 min-w-[48px] sm:min-w-[56px] py-1.5 px-2.5 rounded-xl text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-700 dark:text-emerald-300 border border-dashed border-emerald-400/60 dark:border-emerald-500/40 transition-all cursor-pointer shadow-xs mx-auto"
                       title={`Anotar puntuación para ${cat.name}`}
                     >
-                      <Plus className="w-3 h-3" />
-                      <span>Anotar</span>
+                      <Plus className="w-4 h-4" />
                     </motion.button>
                   )
                 ) : (

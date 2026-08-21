@@ -79,40 +79,37 @@ export const Header: React.FC<HeaderProps> = ({
                       <span className="text-xs sm:text-sm font-black text-emerald-950 dark:text-emerald-100 truncate max-w-[80px] sm:max-w-[110px]">
                         {player.name}
                       </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
                       <span className="text-xs sm:text-sm font-black text-emerald-700 dark:text-emerald-300">
                         {totals.grandTotal} pts
                       </span>
-                    </div>
-                    {mode === 'digital' ? (
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[10px] font-bold text-emerald-800/90 dark:text-emerald-300/90">
-                          {rollsLeft === 3
-                            ? '3 tiradas'
-                            : rollsLeft === 0
-                            ? '0 tiradas'
-                            : `${rollsLeft} ${rollsLeft === 1 ? 'tirada' : 'tiradas'}`}
-                        </span>
-                        <div className="flex items-center gap-0.5">
-                          {[1, 2, 3].map((rollNum) => {
-                            const isUsed = 3 - rollsLeft >= rollNum;
-                            return (
-                              <span
-                                key={rollNum}
-                                className={`w-1.5 h-1.5 rounded-full transition-all ${
-                                  isUsed
-                                    ? 'bg-slate-300 dark:bg-slate-700'
-                                    : 'bg-emerald-600 dark:bg-emerald-400 ring-1 ring-emerald-500/50'
-                                }`}
-                              />
-                            );
-                          })}
+
+                      {mode === 'digital' ? (
+                        <div className="flex items-center gap-1.5 mt-0.5">
+
+                          <div className="flex items-center gap-0.5">
+                            {[1, 2, 3].map((rollNum) => {
+                              const isUsed = 3 - rollsLeft >= rollNum;
+                              return (
+                                <span
+                                  key={rollNum}
+                                  className={`w-1.5 h-1.5 rounded-full transition-all ${isUsed
+                                      ? 'bg-slate-300 dark:bg-slate-700'
+                                      : 'bg-emerald-600 dark:bg-emerald-400 ring-1 ring-emerald-500/50'
+                                    }`}
+                                />
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <span className="text-[10px] font-bold text-emerald-700/80 dark:text-emerald-300/80">
-                        Turno activo
-                      </span>
-                    )}
+
+                      ) : (
+                        <span className="text-[10px] font-bold text-emerald-700/80 dark:text-emerald-300/80">
+
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
@@ -148,11 +145,10 @@ export const Header: React.FC<HeaderProps> = ({
               type="button"
               onClick={onUndo}
               disabled={!canUndo}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-xl border flex items-center gap-1.5 text-xs sm:text-sm font-bold transition-all ${
-                canUndo
+              className={`px-2.5 sm:px-3 py-1.5 rounded-xl border flex items-center gap-1.5 text-xs sm:text-sm font-bold transition-all ${canUndo
                   ? 'border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 shadow-xs cursor-pointer'
                   : 'border-slate-200 dark:border-slate-800 text-slate-300 dark:text-slate-700 opacity-40 cursor-not-allowed'
-              }`}
+                }`}
               title={
                 canUndo
                   ? 'Deshacer la última anotación o jugada'
