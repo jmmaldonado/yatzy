@@ -47,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
           <div>
             <h1 className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">
-              Classic Yatzy
+              Yatzy
             </h1>
             <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
               Ronda {round} de {totalRounds} • Turno de: {activePlayer.name} {activePlayer.avatar}
@@ -97,7 +97,7 @@ export const Header: React.FC<HeaderProps> = ({
             title="Opciones y Ajustes (Modo, Jugadores, Temas, Sonidos)"
           >
             <Settings className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            <span>Opciones</span>
+            {/* <span>Opciones</span> */}
           </button>
         </div>
       </div>

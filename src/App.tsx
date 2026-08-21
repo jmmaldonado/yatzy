@@ -589,59 +589,6 @@ export default function App() {
 
       {/* Main Game Stage */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 flex flex-col gap-6">
-        {/* Active Player Status Banner */}
-        <div
-          id="active-player-banner"
-          className="rounded-2xl p-4 bg-white/10 dark:bg-slate-900/40 backdrop-blur-md border border-white/10 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-3 shadow-lg"
-        >
-          <div className="flex items-center gap-3">
-            <div className="text-3xl sm:text-4xl filter drop-shadow-md">
-              {activePlayer.avatar}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg sm:text-xl font-black tracking-tight text-white drop-shadow-sm">
-                  Turno de {activePlayer.name}
-                </h2>
-                <span className="text-xs px-2.5 py-0.5 rounded-full font-extrabold uppercase tracking-wider bg-emerald-500 text-white shadow-xs">
-                  Ronda {round} / 15
-                </span>
-              </div>
-              <p className="text-xs text-emerald-100/80 mt-0.5">
-                {mode === 'digital'
-                  ? 'Tira los dados virtuales y bloquea tus combinaciones para puntuar'
-                  : 'Toca cualquier categoría abierta en el scorecard o en el tapete para registrar tu tirada de mesa'}
-              </p>
-            </div>
-          </div>
-
-          {/* Player badges */}
-          <div className="flex items-center gap-2 overflow-x-auto py-1">
-            {players.map((p, idx) => {
-              const totals = calculatePlayerTotals(p.scores);
-              const isCurrent = idx === currentPlayerIndex;
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setCurrentPlayerIndex(idx)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    isCurrent
-                      ? 'bg-white text-slate-900 shadow-md ring-2 ring-emerald-400 scale-105'
-                      : 'bg-black/20 text-white/80 hover:bg-black/30'
-                  }`}
-                  title={`Ver tarjeta de ${p.name}`}
-                >
-                  <span>{p.avatar}</span>
-                  <span className="truncate max-w-[70px]">{p.name}</span>
-                  <span className="px-1.5 py-0.2 rounded-md bg-black/20 text-[11px]">
-                    {totals.grandTotal}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
         {/* Dynamic Layout Based on Mode */}
         {mode === 'digital' ? (

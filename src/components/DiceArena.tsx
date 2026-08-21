@@ -61,9 +61,9 @@ export const DiceArena: React.FC<DiceArenaProps> = ({
               <span className="font-bold text-slate-800 dark:text-slate-100">
                 {currentPlayer.name}'s Turn
               </span>
-              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+{/*               <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
                 Electronic Dice
-              </span>
+              </span> */}
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {isFirstRoll
