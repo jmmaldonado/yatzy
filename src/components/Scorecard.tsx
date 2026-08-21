@@ -119,7 +119,7 @@ export const Scorecard: React.FC<ScorecardProps> = ({
                             ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400 animate-pulse'
                             : previewScore! > 0
                             ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-200 border border-emerald-300/60'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-dashed border-slate-300 dark:border-slate-700'
+                            : 'bg-red-50 dark:bg-red-800 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-dashed border-slate-300 dark:border-slate-700'
                         }`}
                         title={
                           isRecommended
@@ -282,7 +282,7 @@ export const Scorecard: React.FC<ScorecardProps> = ({
               <td className="py-3 px-3 text-left">
                 <div className="flex items-center gap-1.5">
                   <Trophy className="w-4 h-4 text-amber-500" />
-                  <span className="text-sm uppercase tracking-wide">Grand Total</span>
+                  <span className="text-sm uppercase tracking-wide">Total</span>
                 </div>
               </td>
               {players.map((player, idx) => {
