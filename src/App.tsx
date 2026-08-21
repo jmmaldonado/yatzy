@@ -277,18 +277,6 @@ export default function App() {
     [rollsLeft, isRolling]
   );
 
-  const handleHoldAll = useCallback(() => {
-    if (rollsLeft === 3 || rollsLeft === 0 || isRolling) return;
-    setHeld([true, true, true, true, true]);
-    sound.playHoldToggle(true);
-  }, [rollsLeft, isRolling]);
-
-  const handleClearHolds = useCallback(() => {
-    if (rollsLeft === 3 || isRolling) return;
-    setHeld([false, false, false, false, false]);
-    sound.playHoldToggle(false);
-  }, [rollsLeft, isRolling]);
-
   // Advance turn to next player / next round
   const advanceTurn = (updatedPlayers: Player[]) => {
     // Check if game is completed for all players
@@ -562,7 +550,10 @@ export default function App() {
       {/* Streamlined Header Bar */}
       <Header
         round={round}
-        activePlayer={activePlayer}
+        players={players}
+        currentPlayerIndex={currentPlayerIndex}
+        rollsLeft={rollsLeft}
+        mode={mode}
         historyCount={history.length}
         canUndo={undoStack.length > 0}
         onUndo={handleUndo}
@@ -607,8 +598,6 @@ export default function App() {
                 onToggleHold={handleToggleHold}
                 onRollDice={handleRollDice}
                 onScoreCategory={handleSelectScorecardCategory}
-                onHoldAll={handleHoldAll}
-                onClearHolds={handleClearHolds}
               />
             </div>
 

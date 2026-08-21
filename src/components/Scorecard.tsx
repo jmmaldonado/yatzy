@@ -50,26 +50,25 @@ export const Scorecard: React.FC<ScorecardProps> = ({
       >
         {/* Category Name & Info */}
         <td className="py-2.5 px-3 text-left">
-          <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex flex-col text-left">
             <button
               type="button"
               onClick={() => onOpenCategoryInfo(cat.id)}
-              className="text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1 group text-left cursor-pointer"
+              className="text-xs font-semibold text-slate-800 dark:text-slate-100 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1 group text-left cursor-pointer"
               title={`${cat.name}: ${cat.description} (Puntuación máxima: ${cat.maxScore} pts)`}
             >
               <span>{cat.name}</span>
               <HelpCircle className="w-3 h-3 text-slate-400 group-hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
             </button>
-            <span
-              className="text-[10px] font-bold px-1.5 py-0.2 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/60 whitespace-nowrap"
-              title={`Puntuación máxima alcanzable en esta casilla: ${cat.maxScore} puntos`}
-            >
-              Máx: {cat.maxScore}
-            </span>
+            <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+              <span className="text-[10px] sm:text-[11px] italic text-slate-400 dark:text-slate-500">
+                Máx: {cat.maxScore} pts
+              </span>
+              <span className="text-[10px] text-slate-400/80 dark:text-slate-600 hidden sm:inline">
+                • {cat.description}
+              </span>
+            </div>
           </div>
-          <span className="text-[10px] text-slate-400 dark:text-slate-500 hidden sm:inline-block mt-0.5">
-            {cat.description}
-          </span>
         </td>
 
         {/* Player columns */}
@@ -96,17 +95,15 @@ export const Scorecard: React.FC<ScorecardProps> = ({
             >
               <div className="flex items-center justify-center w-full min-h-[32px]">
                 {isScored ? (
-                  <div
-                    className={`inline-flex items-center justify-center min-w-[36px] py-1 px-2.5 rounded-lg text-xs sm:text-sm font-bold ${
+                  <span
+                    className={`text-xs sm:text-sm font-bold ${
                       scoreValue === 0
-                        ? 'text-slate-400 dark:text-slate-600 line-through bg-slate-100 dark:bg-slate-800'
-                        : scoreValue >= (cat.section === 'upper' ? 12 : 20)
-                        ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/15'
-                        : 'text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800/80'
+                        ? 'text-slate-400 dark:text-slate-500 line-through'
+                        : 'text-slate-800 dark:text-slate-100'
                     }`}
                   >
                     {scoreValue}
-                  </div>
+                  </span>
                 ) : isCurrentTurn ? (
                   // Turn is active for this player
                   isDigitalMode ? (
@@ -136,7 +133,7 @@ export const Scorecard: React.FC<ScorecardProps> = ({
                         <span>{previewScore}</span>
                       </motion.button>
                     ) : (
-                      <span className="text-slate-300 dark:text-slate-700 text-xs font-semibold">-</span>
+                      <span className="text-slate-300 dark:text-slate-700 text-xs font-semibold select-none">-</span>
                     )
                   ) : (
                     // Physical Dice Tracker Mode: Clicking opens the score modal for this category
@@ -154,7 +151,7 @@ export const Scorecard: React.FC<ScorecardProps> = ({
                     </motion.button>
                   )
                 ) : (
-                  <span className="text-slate-300 dark:text-slate-700 text-xs font-semibold">-</span>
+                  <span className="text-slate-300 dark:text-slate-700 text-xs font-semibold select-none">-</span>
                 )}
               </div>
             </td>
@@ -195,11 +192,6 @@ export const Scorecard: React.FC<ScorecardProps> = ({
                       <span className="font-bold truncate max-w-[80px] sm:max-w-[110px]">
                         {player.name}
                       </span>
-                      {isCurrent && (
-                        <span className="text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.2 rounded-full bg-emerald-600 text-white mt-0.5 shadow-xs">
-                          Turn
-                        </span>
-                      )}
                     </div>
                   </th>
                 );

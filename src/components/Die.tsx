@@ -38,15 +38,15 @@ export const Die: React.FC<DieProps> = ({
   const currentPips = pipPositions[value] || [4];
 
   const sizeClasses = {
-    sm: 'w-11 h-11 rounded-xl p-1.5',
-    md: 'w-15 h-15 sm:w-18 sm:h-18 rounded-2xl p-2.5',
-    lg: 'w-18 h-18 sm:w-22 sm:h-22 rounded-2xl p-3',
+    sm: 'w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl p-1',
+    md: 'w-11 h-11 min-w-[2.75rem] sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl p-1.5 sm:p-2',
+    lg: 'w-14 h-14 sm:w-18 sm:h-18 rounded-xl sm:rounded-2xl p-2 sm:p-2.5',
   }[size];
 
   const pipSize = {
-    sm: 'w-2 h-2',
-    md: 'w-2.5 h-2.5 sm:w-3 sm:h-3',
-    lg: 'w-3.5 h-3.5 sm:w-4 sm:h-4',
+    sm: 'w-1.5 h-1.5',
+    md: 'w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3',
+    lg: 'w-2.5 h-2.5 sm:w-3 sm:h-3',
   }[size];
 
   // Random rotation offset during roll
