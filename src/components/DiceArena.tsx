@@ -46,20 +46,33 @@ export const DiceArena: React.FC<DiceArenaProps> = ({
       {/* Dice Container Tray - Guaranteed single row */}
       <div
         id="dice-tray"
-        className="relative bg-radial from-emerald-900/10 via-slate-900/5 to-transparent dark:from-emerald-950/40 dark:via-slate-950/20 dark:to-transparent rounded-2xl p-2.5 sm:p-4 border border-slate-200/50 dark:border-slate-800/60 flex flex-nowrap items-center justify-center gap-1.5 sm:gap-3 md:gap-4 w-full overflow-hidden"
+        className="relative bg-radial from-emerald-900/10 via-slate-900/5 to-transparent dark:from-emerald-950/40 dark:via-slate-950/20 dark:to-transparent rounded-2xl p-2.5 sm:p-4 border border-slate-200/50 dark:border-slate-800/60 flex flex-nowrap items-center justify-center gap-1.5 sm:gap-3 md:gap-4 w-full min-h-[72px] sm:min-h-[88px] overflow-hidden"
       >
-        {dice.map((val, idx) => (
-          <Die
-            key={idx}
-            index={idx}
-            value={val}
-            isHeld={held[idx]}
-            isRolling={isRolling}
-            disabled={rollsLeft === 0 || isFirstRoll}
-            onToggleHold={isFirstRoll ? undefined : onToggleHold}
-            size="md"
-          />
-        ))}
+        {isFirstRoll ? (
+          <div className="flex items-center gap-1.5 sm:gap-3 md:gap-4 opacity-35 select-none">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="w-11 h-11 min-w-[2.75rem] sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-100/40 dark:bg-slate-800/20 flex items-center justify-center"
+              >
+                <Dices className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400 dark:text-slate-600" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          dice.map((val, idx) => (
+            <Die
+              key={idx}
+              index={idx}
+              value={val}
+              isHeld={held[idx]}
+              isRolling={isRolling}
+              disabled={rollsLeft === 0}
+              onToggleHold={onToggleHold}
+              size="md"
+            />
+          ))
+        )}
       </div>
 
       {/* Roll Action Button & Helper text */}
