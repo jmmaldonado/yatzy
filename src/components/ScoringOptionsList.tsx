@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { Sparkles, Check, Ban, TrendingUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Sparkles, Check, Ban, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
 import { Category, Player } from '../types';
 import { CATEGORIES, calculateCategoryScore, findBestCategory } from '../utils/yatzyLogic';
 
@@ -9,6 +9,8 @@ interface ScoringOptionsListProps {
   dice: number[];
   onScoreCategory: (category: Category, dice: number[]) => void;
   smartRecommendations: boolean;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 export const ScoringOptionsList: React.FC<ScoringOptionsListProps> = ({
@@ -16,8 +18,14 @@ export const ScoringOptionsList: React.FC<ScoringOptionsListProps> = ({
   dice,
   onScoreCategory,
   smartRecommendations,
+  isCollapsed: controlledIsCollapsed,
+  onToggleCollapse,
 }) => {
   const [filterMode, setFilterMode] = useState<'all' | 'scoring' | 'upper' | 'lower'>('all');
+  const [internalIsCollapsed, setInternalIsCollapsed] = useState<boolean>(true);
+
+  const isCollapsed = controlledIsCollapsed !== undefined ? controlledIsCollapsed : internalIsCollapsed;
+  const toggleCollapse = onToggleCollapse || (() => setInternalIsCollapsed((prev) => !prev));
 
   const openCategories = CATEGORIES.filter((c) => currentPlayer.scores[c.id] === undefined);
 
@@ -52,22 +60,100 @@ export const ScoringOptionsList: React.FC<ScoringOptionsListProps> = ({
 
   return (
     <div className="flex flex-col gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+      <div className="flex items-center justify-between gap-2 w-full">
+        {/* Title & Badge on Left */}
+        <button
+          type="button"
+          onClick={toggleCollapse}
+          className="flex items-center gap-2 text-left group cursor-pointer select-none"
+          title={isCollapsed ? 'Mostrar opciones de puntuación' : 'Ocultar opciones de puntuación'}
+        >
+          <div className="flex items-center gap-1.5">
             <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Opciones de Puntuación</span>
-          </h4>
-          <p className="text-[11px] text-slate-400">
-            {scoringCount} {scoringCount === 1 ? 'opción con puntos' : 'opciones con puntos'} disponibles
-          </p>
-        </div>
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+              Opciones de Puntuación
+            </h4>
+          </div>
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+            {scoringCount} {scoringCount === 1 ? 'con puntos' : 'con puntos'}
+          </span>
+        </button>
 
-        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-[11px] font-bold">
+        {/* Right side: Filters when expanded + Prominent Chevron at Rightmost position */}
+        <div className="flex items-center gap-1.5">
+          {!isCollapsed && (
+            <div className="hidden sm:flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-[11px] font-bold">
+              <button
+                type="button"
+                onClick={() => setFilterMode('all')}
+                className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
+                  filterMode === 'all'
+                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500'
+                }`}
+              >
+                Todas ({openCategories.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterMode('scoring')}
+                className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
+                  filterMode === 'scoring'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-500'
+                }`}
+              >
+                Con puntos ({scoringCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterMode('upper')}
+                className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
+                  filterMode === 'upper'
+                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500'
+                }`}
+              >
+                Superior
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterMode('lower')}
+                className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
+                  filterMode === 'lower'
+                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500'
+                }`}
+              >
+                Inferior
+              </button>
+            </div>
+          )}
+
+          {/* Rightmost noticeable collapse/expand button */}
+          <button
+            type="button"
+            onClick={toggleCollapse}
+            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200 transition-all cursor-pointer shadow-xs flex items-center justify-center shrink-0"
+            title={isCollapsed ? 'Desplegar opciones de puntuación' : 'Plegar opciones de puntuación'}
+            aria-label={isCollapsed ? 'Desplegar opciones de puntuación' : 'Plegar opciones de puntuación'}
+          >
+            {isCollapsed ? (
+              <ChevronDown className="w-4 h-4 text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
+            ) : (
+              <ChevronUp className="w-4 h-4 text-slate-600 dark:text-slate-300 stroke-[2.5]" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile filter pills when expanded */}
+      {!isCollapsed && (
+        <div className="flex sm:hidden items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-[10px] font-bold overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => setFilterMode('all')}
-            className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
+            className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer shrink-0 ${
               filterMode === 'all'
                 ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
                 : 'text-slate-500'
@@ -78,7 +164,7 @@ export const ScoringOptionsList: React.FC<ScoringOptionsListProps> = ({
           <button
             type="button"
             onClick={() => setFilterMode('scoring')}
-            className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
+            className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer shrink-0 ${
               filterMode === 'scoring'
                 ? 'bg-emerald-600 text-white shadow-xs'
                 : 'text-slate-500'
@@ -89,7 +175,7 @@ export const ScoringOptionsList: React.FC<ScoringOptionsListProps> = ({
           <button
             type="button"
             onClick={() => setFilterMode('upper')}
-            className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
+            className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer shrink-0 ${
               filterMode === 'upper'
                 ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
                 : 'text-slate-500'
@@ -100,7 +186,7 @@ export const ScoringOptionsList: React.FC<ScoringOptionsListProps> = ({
           <button
             type="button"
             onClick={() => setFilterMode('lower')}
-            className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
+            className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer shrink-0 ${
               filterMode === 'lower'
                 ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
                 : 'text-slate-500'
@@ -109,9 +195,17 @@ export const ScoringOptionsList: React.FC<ScoringOptionsListProps> = ({
             Inferior
           </button>
         </div>
-      </div>
+      )}
 
-      <div className="flex flex-col gap-1.5 max-h-[300px] overflow-y-auto pr-1">
+      <AnimatePresence initial={false}>
+        {!isCollapsed && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col gap-1.5 max-h-[300px] overflow-y-auto pr-1"
+          >
         {sortedOptions.length === 0 ? (
           <div className="p-4 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">
             No hay casillas abiertas que coincidan con este filtro.
@@ -165,8 +259,6 @@ export const ScoringOptionsList: React.FC<ScoringOptionsListProps> = ({
                       <span className="font-semibold text-slate-500 dark:text-slate-400">
                         Máx: <strong className="text-slate-700 dark:text-slate-300">{opt.maxScore} pts</strong>
                       </span>
-                      <span>•</span>
-                      <span className="truncate">{opt.cat.section === 'upper' ? 'Sección Superior' : 'Sección Inferior'}</span>
                     </div>
                   </div>
                 </div>
@@ -219,7 +311,9 @@ export const ScoringOptionsList: React.FC<ScoringOptionsListProps> = ({
             );
           })
         )}
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
