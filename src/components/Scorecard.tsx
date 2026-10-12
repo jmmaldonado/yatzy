@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, Trophy, HelpCircle, Plus } from 'lucide-react';
+import { Sparkles, Trophy, HelpCircle, Plus, Pencil } from 'lucide-react';
 import {
   CATEGORIES,
   UPPER_CATEGORIES,
@@ -15,13 +15,15 @@ interface ScorecardProps {
   players: Player[];
   currentPlayerIndex: number;
   mode: GameMode;
-  dice: number[];
+  dice: (number | null)[];
   rollsLeft: number;
   recommendation: RecommendationResult | null;
   selectedCategory: Category | null;
   smartRecommendations: boolean;
   onSelectCategory: (category: Category) => void;
   onOpenCategoryInfo: (category: Category) => void;
+  onEditScore?: (player: Player, category: Category, currentScore: number) => void;
+  isEditModeActive?: boolean;
 }
 
 export const Scorecard: React.FC<ScorecardProps> = ({
@@ -35,6 +37,8 @@ export const Scorecard: React.FC<ScorecardProps> = ({
   smartRecommendations,
   onSelectCategory,
   onOpenCategoryInfo,
+  onEditScore,
+  isEditModeActive = false,
 }) => {
   const activePlayer = players[currentPlayerIndex];
   const isDigitalMode = mode === 'digital';
@@ -95,15 +99,32 @@ export const Scorecard: React.FC<ScorecardProps> = ({
             >
               <div className="flex items-center justify-center w-full min-h-[32px]">
                 {isScored ? (
-                  <span
-                    className={`text-xs sm:text-sm font-bold ${
-                      scoreValue === 0
-                        ? 'text-slate-400 dark:text-slate-500 line-through'
-                        : 'text-slate-800 dark:text-slate-100'
-                    }`}
-                  >
-                    {scoreValue}
-                  </span>
+                  isEditModeActive && onEditScore ? (
+                    <motion.button
+                      id={`btn-edit-score-${player.id}-${cat.id}`}
+                      type="button"
+                      onClick={() => onEditScore(player, cat.id, scoreValue)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="inline-flex items-center justify-center gap-1.5 min-w-[48px] sm:min-w-[56px] py-1.5 px-2 rounded-xl text-xs sm:text-sm font-extrabold bg-amber-500/15 hover:bg-amber-500 hover:text-slate-950 text-amber-900 dark:text-amber-200 border-2 border-dashed border-amber-500/80 dark:border-amber-400/80 shadow-xs transition-all cursor-pointer mx-auto animate-pulse"
+                      title={`Modo Edición: Pulsa para modificar o mover la casilla ${cat.name} de ${player.name} (${scoreValue} pts)`}
+                    >
+                      <Pencil className="w-3 h-3 text-amber-700 dark:text-amber-300 shrink-0" />
+                      <span className={scoreValue === 0 ? 'line-through text-slate-400' : ''}>
+                        {scoreValue}
+                      </span>
+                    </motion.button>
+                  ) : (
+                    <span
+                      className={`text-xs sm:text-sm font-bold ${
+                        scoreValue === 0
+                          ? 'text-slate-400 dark:text-slate-500 line-through'
+                          : 'text-slate-800 dark:text-slate-100'
+                      }`}
+                    >
+                      {scoreValue}
+                    </span>
+                  )
                 ) : isCurrentTurn ? (
                   // Turn is active for this player
                   isDigitalMode ? (

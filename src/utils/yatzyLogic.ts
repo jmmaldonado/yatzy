@@ -144,25 +144,68 @@ export const CATEGORIES: CategoryInfo[] = [
 export const UPPER_CATEGORIES = CATEGORIES.filter(c => c.section === 'upper');
 export const LOWER_CATEGORIES = CATEGORIES.filter(c => c.section === 'lower');
 
+// Helper to get typical/normal score chips for a category in direct scoring
+export function getNormalCategoryChips(category: Category): number[] {
+  switch (category) {
+    case 'ones':
+      return [1, 2, 3, 4, 5];
+    case 'twos':
+      return [2, 4, 6, 8, 10];
+    case 'threes':
+      return [3, 6, 9, 12, 15];
+    case 'fours':
+      return [4, 8, 12, 16, 20];
+    case 'fives':
+      return [5, 10, 15, 20, 25];
+    case 'sixes':
+      return [6, 12, 18, 24, 30];
+    case 'one_pair':
+      return [2, 4, 6, 8, 10, 12];
+    case 'two_pairs':
+      return [6, 10, 14, 16, 18, 20, 22];
+    case 'three_of_a_kind':
+      return [3, 6, 9, 12, 15, 18];
+    case 'four_of_a_kind':
+      return [4, 8, 12, 16, 20, 24];
+    case 'small_straight':
+      return [15];
+    case 'large_straight':
+      return [20];
+    case 'full_house':
+      return [15, 18, 21, 24, 27, 28];
+    case 'chance':
+      return [15, 18, 20, 22, 25, 30];
+    case 'yatzy':
+      return [50];
+    default:
+      return [5, 10, 15, 20, 25];
+  }
+}
+
 // Helper to count frequencies of each face 1-6
-export function getCounts(dice: number[]): Record<number, number> {
+export function getCounts(dice: (number | null | undefined)[]): Record<number, number> {
   const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
   for (const d of dice) {
-    if (d >= 1 && d <= 6) {
+    if (typeof d === 'number' && d >= 1 && d <= 6) {
       counts[d] = (counts[d] || 0) + 1;
     }
   }
   return counts;
 }
 
-// Calculate the score for a specific category given 5 dice
-export function calculateCategoryScore(category: Category, dice: number[]): number {
-  if (!dice || dice.length !== 5 || dice.some(d => d < 1 || d > 6)) {
+// Calculate the score for a specific category given 5 dice (supports partial/null dice)
+export function calculateCategoryScore(category: Category, dice: (number | null | undefined)[]): number {
+  if (!dice || dice.length === 0) {
     return 0;
   }
 
-  const counts = getCounts(dice);
-  const sumAll = dice.reduce((acc, val) => acc + val, 0);
+  const validDice = dice.filter((d): d is number => typeof d === 'number' && d >= 1 && d <= 6);
+  if (validDice.length === 0) {
+    return 0;
+  }
+
+  const counts = getCounts(validDice);
+  const sumAll = validDice.reduce((acc, val) => acc + val, 0);
 
   switch (category) {
     case 'ones':
@@ -342,7 +385,7 @@ export interface RecommendationResult {
 
 export function findBestCategory(
   player: Player,
-  dice: number[]
+  dice: (number | null | undefined)[]
 ): RecommendationResult | null {
   const openCategories = CATEGORIES.filter(c => player.scores[c.id] === undefined);
   if (openCategories.length === 0) return null;

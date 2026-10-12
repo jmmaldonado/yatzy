@@ -7,11 +7,11 @@ import { ScoringOptionsList } from './ScoringOptionsList';
 
 interface PhysicalTrackerInputProps {
   currentPlayer: Player;
-  physicalDice: number[];
-  onUpdatePhysicalDice: (dice: number[]) => void;
+  physicalDice: (number | null)[];
+  onUpdatePhysicalDice: (dice: (number | null)[]) => void;
   smartRecommendations?: boolean;
-  onScoreCategoryWithDice: (category: Category, dice: number[]) => void;
-  onDirectManualScore: (category: Category, score: number) => void;
+  onScoreCategoryWithDice: (category: Category, dice: (number | null)[]) => void;
+  onDirectManualScore?: (category: Category, score: number) => void;
 }
 
 export const PhysicalTrackerInput: React.FC<PhysicalTrackerInputProps> = ({
@@ -40,7 +40,7 @@ export const PhysicalTrackerInput: React.FC<PhysicalTrackerInputProps> = ({
   };
 
   const handleResetDice = () => {
-    onUpdatePhysicalDice([1, 1, 1, 1, 1]);
+    onUpdatePhysicalDice([null, null, null, null, null]);
     setActiveDieIndex(0);
   };
 
@@ -78,7 +78,7 @@ export const PhysicalTrackerInput: React.FC<PhysicalTrackerInputProps> = ({
             onClick={handleResetDice}
             className="hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1 font-semibold text-xs cursor-pointer"
           >
-            <RotateCcw className="w-3 h-3" /> Reiniciar (1s)
+            <RotateCcw className="w-3 h-3" /> Vaciar dados
           </button>
         </div>
 

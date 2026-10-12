@@ -16,6 +16,7 @@ import { Category, Player } from '../types';
 import {
   CATEGORIES,
   calculateCategoryScore,
+  getNormalCategoryChips,
 } from '../utils/yatzyLogic';
 import { Die } from './Die';
 
@@ -23,8 +24,8 @@ interface PhysicalScoreModalProps {
   isOpen: boolean;
   category: Category | null;
   player: Player;
-  physicalDice: number[];
-  onUpdatePhysicalDice: (dice: number[]) => void;
+  physicalDice: (number | null)[];
+  onUpdatePhysicalDice: (dice: (number | null)[]) => void;
   onClose: () => void;
   onConfirmScore: (category: Category, score: number) => void;
 }
@@ -43,12 +44,14 @@ export const PhysicalScoreModal: React.FC<PhysicalScoreModalProps> = ({
   const [activeDieIndex, setActiveDieIndex] = useState<number>(0);
 
   const catInfo = category ? CATEGORIES.find((c) => c.id === category) : null;
+  const normalChips = category ? getNormalCategoryChips(category) : [];
 
-  // Whenever modal opens for a category, pre-calculate the score with the current physicalDice
+  // Whenever modal opens for a category, start with empty physical dice and reset state
   useEffect(() => {
     if (isOpen && category) {
-      const calculated = calculateCategoryScore(category, physicalDice);
-      setManualScore(calculated);
+      onUpdatePhysicalDice([null, null, null, null, null]);
+      const chips = getNormalCategoryChips(category);
+      setManualScore(chips[0] ?? 0);
       setEntryMode('dice');
       setActiveDieIndex(0);
     }
@@ -64,13 +67,18 @@ export const PhysicalScoreModal: React.FC<PhysicalScoreModalProps> = ({
     setActiveDieIndex(index);
   };
 
-  // Set die value directly
+  // Set die value directly and advance to next slot
   const handleSetDieValue = (val: number) => {
-    const targetIdx = activeDieIndex;
     const updated = [...physicalDice];
-    updated[targetIdx] = val;
+    updated[activeDieIndex] = val;
     onUpdatePhysicalDice(updated);
     setActiveDieIndex((prev) => (prev + 1) % 5);
+  };
+
+  // Reset all 5 dice to empty
+  const handleClearDice = () => {
+    onUpdatePhysicalDice([null, null, null, null, null]);
+    setActiveDieIndex(0);
   };
 
   // Set all dice to a uniform number
@@ -155,7 +163,7 @@ export const PhysicalScoreModal: React.FC<PhysicalScoreModalProps> = ({
               }`}
             >
               <Dices className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <span>Dados Reales (Sincronizados)</span>
+              <span>Dados</span>
             </button>
             <button
               id="tab-method-direct"
@@ -168,18 +176,14 @@ export const PhysicalScoreModal: React.FC<PhysicalScoreModalProps> = ({
               }`}
             >
               <Hash className="w-4 h-4 text-amber-500" />
-              <span>Introducción Directa</span>
+              <span>Valor</span>
             </button>
           </div>
 
           {/* TAB 1: Match 5 Tabletop Dice */}
           {entryMode === 'dice' && (
             <div className="flex flex-col gap-4">
-              <div className="text-center">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  Toca un dado para rotar (1-6) o pulsa un número para fijarlo:
-                </span>
-              </div>
+
 
               {/* 5 Dice Slots */}
               <div className="flex items-center justify-center gap-2.5 sm:gap-3 py-1">
@@ -210,14 +214,20 @@ export const PhysicalScoreModal: React.FC<PhysicalScoreModalProps> = ({
               </div>
 
               {/* Quick Number Selector for selected die & Presets */}
-              <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-700/80 flex flex-col gap-2">
+              <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-700/80 flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     {activeDieIndex !== null ? `Fijar Dado #${activeDieIndex + 1}:` : 'Fijar valor:'}
                   </span>
-                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                    ✓ Sincronizado con tapete
-                  </span>
+                  <button
+                  id="btn-clear-modal-dice"
+                  type="button"
+                  onClick={handleClearDice}
+                  className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-1 font-semibold text-xs cursor-pointer transition-colors"
+                  title="Vaciar todos los dados"
+                >
+                  <RotateCcw className="w-3 h-3" /> Vaciar dados
+                </button>
                 </div>
 
                 <div className="grid grid-cols-6 gap-1.5">
@@ -245,27 +255,16 @@ export const PhysicalScoreModal: React.FC<PhysicalScoreModalProps> = ({
                   </div>
                 </div>
 
-                <div className="text-right">
-                  {calculatedDiceScore > 0 ? (
-                    <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-emerald-600 text-white font-bold text-xs shadow-xs">
-                      <Check className="w-3.5 h-3.5" /> Coincidencia Válida
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs">
-                      0 Puntos (Tachar)
-                    </span>
-                  )}
-                </div>
               </div>
             </div>
           )}
 
           {/* TAB 2: Direct Score Box */}
           {entryMode === 'direct' && (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-8">
               <div className="text-center">
                 <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  Introduce o ajusta directamente los puntos para {catInfo.name}:
+                  Introduce o selecciona los puntos para {catInfo.name}:
                 </span>
               </div>
 
@@ -302,61 +301,55 @@ export const PhysicalScoreModal: React.FC<PhysicalScoreModalProps> = ({
                 </button>
               </div>
 
-              {/* Quick preset buttons */}
-              <div className="grid grid-cols-5 gap-2">
-                {[0, 15, 20, 25, catInfo.maxScore].map((val, idx) => (
-                  <button
-                    key={`${val}-${idx}`}
-                    type="button"
-                    onClick={() => setManualScore(val)}
-                    className={`py-2 rounded-xl font-extrabold text-xs transition-colors cursor-pointer border ${
-                      manualScore === val
-                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs'
-                        : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
-                    }`}
-                  >
-                    {val} pts
-                  </button>
-                ))}
+              {/* Quick normal category values chips */}
+              <div className="flex flex-col gap-2">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">
+                  Valores habituales para {catInfo.name}:
+                </span>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {normalChips.map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => setManualScore(val)}
+                      className={`min-w-[52px] py-2 px-3 rounded-xl font-black text-sm transition-all cursor-pointer border ${
+                        manualScore === val
+                          ? 'bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-600/30 scale-105 ring-2 ring-emerald-400/50'
+                          : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      {val} pts
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
-          {/* Action Buttons: Scratch (0 pts), Cancel, Confirm (+X pts) */}
-          <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+          {/* Action Buttons: Exactly two buttons (Tachar / Guardar) */}
+          <div className="pt-3 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 gap-3">
             <button
               id="btn-modal-scratch"
               type="button"
               onClick={handleScratch}
-              className="px-4 py-3 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 font-bold text-xs sm:text-sm hover:bg-rose-100 dark:hover:bg-rose-900/50 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              className="py-3 px-4 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 font-bold text-xs sm:text-sm hover:bg-rose-100 dark:hover:bg-rose-900/50 flex items-center justify-center gap-2 transition-colors cursor-pointer"
               title="Tachar casilla con 0 puntos"
             >
-              <Ban className="w-4 h-4" />
+              <Ban className="w-4 h-4 shrink-0" />
               <span>Tachar (0 pts)</span>
             </button>
 
-            <div className="flex items-center gap-2">
-              <button
-                id="btn-modal-cancel"
-                type="button"
-                onClick={onClose}
-                className="flex-1 sm:flex-initial px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-              >
-                Cancelar
-              </button>
-
-              <motion.button
-                id="btn-modal-confirm-score"
-                type="button"
-                onClick={handleConfirm}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex-1 sm:flex-initial px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-colors cursor-pointer"
-              >
-                <Check className="w-4 h-4" />
-                <span>Guardar {currentScore} pts</span>
-              </motion.button>
-            </div>
+            <motion.button
+              id="btn-modal-confirm-score"
+              type="button"
+              onClick={handleConfirm}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-colors cursor-pointer"
+            >
+              <Check className="w-4 h-4 shrink-0" />
+              <span>Guardar {currentScore} pts</span>
+            </motion.button>
           </div>
         </div>
       </motion.div>

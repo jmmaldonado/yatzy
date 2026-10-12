@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Lock, Unlock } from 'lucide-react';
 
 interface DieProps {
-  value: number; // 1 to 6
+  value: number | null | undefined; // 1 to 6, or null/empty
   isHeld?: boolean;
   isRolling?: boolean;
   disabled?: boolean;
@@ -25,6 +25,8 @@ export const Die: React.FC<DieProps> = ({
   showHoldLabel = Boolean(onToggleHold),
   size = 'md',
 }) => {
+  const isEmpty = !value || value < 1 || value > 6;
+
   // Dot pip positions for standard die faces (3x3 grid)
   const pipPositions: Record<number, number[]> = {
     1: [4], // center
@@ -35,7 +37,7 @@ export const Die: React.FC<DieProps> = ({
     6: [0, 2, 3, 5, 6, 8], // 2 vertical columns of 3
   };
 
-  const currentPips = pipPositions[value] || [4];
+  const currentPips = !isEmpty ? pipPositions[value!] || [4] : [];
 
   const sizeClasses = {
     sm: 'w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl p-1',
@@ -82,14 +84,20 @@ export const Die: React.FC<DieProps> = ({
         }}
         whileHover={isClickable ? { scale: 1.05, y: -2 } : {}}
         whileTap={isClickable ? { scale: 0.92 } : {}}
-        className={`relative ${sizeClasses} transition-all duration-200 shadow-lg flex flex-col justify-between ${
+        className={`relative ${sizeClasses} transition-all duration-200 shadow-md flex items-center justify-center ${
           isClickable ? 'cursor-pointer' : 'cursor-default'
         } ${
-          isHeld
+          isEmpty
+            ? 'bg-slate-50/70 dark:bg-slate-800/40 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-400 dark:hover:border-emerald-500'
+            : isHeld
             ? 'bg-gradient-to-b from-amber-50 to-amber-100 border-2 border-amber-500 shadow-amber-500/25 ring-2 ring-amber-400/40'
             : 'bg-gradient-to-b from-white to-slate-100 border-2 border-slate-200/90 hover:border-slate-300 hover:shadow-xl'
         } ${disabled ? 'opacity-80' : ''}`}
-        aria-label={`Die ${index + 1} with value ${value}${isHeld ? ' (Held)' : ''}`}
+        aria-label={
+          isEmpty
+            ? `Dado ${index + 1} vacío`
+            : `Die ${index + 1} with value ${value}${isHeld ? ' (Held)' : ''}`
+        }
       >
         {/* Held badge indicator at top corner */}
         {isHeld && (
@@ -101,27 +109,33 @@ export const Die: React.FC<DieProps> = ({
           </span>
         )}
 
-        {/* 3x3 Pip grid */}
-        <div className="grid grid-cols-3 grid-rows-3 w-full h-full gap-0.5 pointer-events-none">
-          {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((gridPos) => {
-            const hasPip = currentPips.includes(gridPos);
-            return (
-              <div key={gridPos} className="flex items-center justify-center">
-                {hasPip && (
-                  <div
-                    className={`${pipSize} rounded-full ${
-                      value === 1
-                        ? 'bg-rose-600 shadow-sm'
-                        : isHeld
-                        ? 'bg-amber-950 shadow-inner'
-                        : 'bg-slate-900 shadow-inner'
-                    }`}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
+        {/* Empty state placeholder or 3x3 Pip grid */}
+        {isEmpty ? (
+          <div className="flex items-center justify-center text-slate-300 dark:text-slate-600 font-black text-sm sm:text-base pointer-events-none select-none">
+            ?
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 grid-rows-3 w-full h-full gap-0.5 pointer-events-none">
+            {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((gridPos) => {
+              const hasPip = currentPips.includes(gridPos);
+              return (
+                <div key={gridPos} className="flex items-center justify-center">
+                  {hasPip && (
+                    <div
+                      className={`${pipSize} rounded-full ${
+                        value === 1
+                          ? 'bg-rose-600 shadow-sm'
+                          : isHeld
+                          ? 'bg-amber-950 shadow-inner'
+                          : 'bg-slate-900 shadow-inner'
+                      }`}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </motion.button>
 
       {/* Hold toggle status label if requested */}

@@ -3,6 +3,7 @@ import {
   Dices,
   Settings,
   Undo2,
+  Pencil,
 } from 'lucide-react';
 import { Player, GameMode } from '../types';
 import { calculatePlayerTotals } from '../utils/yatzyLogic';
@@ -17,6 +18,8 @@ interface HeaderProps {
   historyCount?: number;
   canUndo?: boolean;
   onUndo?: () => void;
+  isEditModeActive?: boolean;
+  onToggleEditMode?: () => void;
   onOpenSettings: () => void;
   onOpenRules: () => void;
   onOpenHistory: () => void;
@@ -33,6 +36,8 @@ export const Header: React.FC<HeaderProps> = ({
   historyCount = 0,
   canUndo = false,
   onUndo,
+  isEditModeActive = false,
+  onToggleEditMode,
   onOpenSettings,
   onOpenRules,
   onOpenHistory,
@@ -158,6 +163,34 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Undo2 className="w-4 h-4 text-amber-500" />
               <span className="hidden sm:inline">Deshacer</span>
+            </button>
+          )}
+
+          {/* Toggle Edit Past Scores Mode Button */}
+          {onToggleEditMode && (
+            <button
+              id="btn-header-toggle-edit-mode"
+              type="button"
+              onClick={onToggleEditMode}
+              className={`px-2.5 sm:px-3 py-1.5 rounded-xl border flex items-center gap-1.5 text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                isEditModeActive
+                  ? 'border-amber-500 bg-amber-500 text-slate-950 shadow-md shadow-amber-500/30 ring-2 ring-amber-400/50'
+                  : 'border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
+              }`}
+              title={
+                isEditModeActive
+                  ? 'Modo edición activo: pulsa para salir del modo de edición'
+                  : 'Habilitar modo de edición para modificar puntuaciones pasadas'
+              }
+            >
+              <Pencil
+                className={`w-4 h-4 ${
+                  isEditModeActive ? 'text-slate-950 stroke-[2.5]' : 'text-amber-500'
+                }`}
+              />
+              <span className="hidden sm:inline">
+                {isEditModeActive ? 'Editando' : 'Editar'}
+              </span>
             </button>
           )}
 

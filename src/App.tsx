@@ -35,6 +35,7 @@ import {
 import { Category, GameMode, Player, AppTheme, MatchRecord } from './types';
 import { Dices, Eye, EyeOff, Sparkles, HelpCircle, Undo2, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { EditScoreModal } from './components/EditScoreModal';
 
 interface GameSnapshot {
   players: Player[];
@@ -43,7 +44,7 @@ interface GameSnapshot {
   dice: number[];
   held: boolean[];
   rollsLeft: number;
-  physicalDice: number[];
+  physicalDice: (number | null)[];
   mode: GameMode;
   actionDescription?: string;
 }
@@ -81,10 +82,18 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [isScoringOptionsCollapsed, setIsScoringOptionsCollapsed] = useState<boolean>(true);
 
-  // Synchronized Physical Dice Tracker State (shared between mat & modal)
-  const [physicalDice, setPhysicalDice] = useState<number[]>([1, 2, 3, 4, 5]);
+  // Synchronized Physical Dice Tracker State (starts empty and fills sequentially)
+  const [physicalDice, setPhysicalDice] = useState<(number | null)[]>([null, null, null, null, null]);
   const [selectedPhysicalCategory, setSelectedPhysicalCategory] = useState<Category | null>(null);
   const [showPhysicalSidePanel, setShowPhysicalSidePanel] = useState<boolean>(false);
+
+  // Arbitrary Score Editing State
+  const [editingScoreInfo, setEditingScoreInfo] = useState<{
+    player: Player;
+    category: Category;
+    currentScore: number;
+  } | null>(null);
+  const [isEditScoresMode, setIsEditScoresMode] = useState<boolean>(false);
 
   // Undo System Stack
   const [undoStack, setUndoStack] = useState<GameSnapshot[]>([]);
@@ -167,7 +176,7 @@ export default function App() {
           setDice(parsed.dice || [1, 2, 3, 4, 5]);
           setHeld(parsed.held || [false, false, false, false, false]);
           setRollsLeft(parsed.rollsLeft ?? 3);
-          setPhysicalDice(parsed.physicalDice || [1, 2, 3, 4, 5]);
+          setPhysicalDice(parsed.physicalDice || [null, null, null, null, null]);
           setTheme(parsed.theme || 'felt');
           setSoundEnabled(parsed.soundEnabled ?? true);
           setSmartRecommendations(parsed.smartRecommendations ?? true);
@@ -310,6 +319,7 @@ export default function App() {
     setDice([1, 2, 3, 4, 5]);
     setHeld([false, false, false, false, false]);
     setRollsLeft(3);
+    setPhysicalDice([null, null, null, null, null]);
     setSelectedCategory(null);
     setSelectedPhysicalCategory(null);
   };
@@ -336,7 +346,7 @@ export default function App() {
   };
 
   // Score a category with physical dice in Tracker mode (from optional side panel)
-  const handleScoreCategoryWithPhysicalDice = (category: Category, diceUsed: number[]) => {
+  const handleScoreCategoryWithPhysicalDice = (category: Category, diceUsed: (number | null)[]) => {
     if (activePlayer.scores[category] !== undefined) return;
     const score = calculateCategoryScore(category, diceUsed);
     recordScoreForActivePlayer(category, score);
@@ -389,8 +399,136 @@ export default function App() {
       sound.playBonus();
     }
 
+    setPhysicalDice([null, null, null, null, null]);
     setPlayers(updatedPlayers);
     advanceTurn(updatedPlayers);
+  };
+
+  // Arbitrary Score Modification Handlers
+  const handleSaveModifiedScore = (playerId: string, category: Category, newScore: number) => {
+    const targetPlayer = players.find((p) => p.id === playerId);
+    if (!targetPlayer) return;
+
+    const catName = CATEGORIES.find((c) => c.id === category)?.name || category;
+    const oldScore = targetPlayer.scores[category] ?? 0;
+
+    // Snapshot for UNDO
+    const snapshot: GameSnapshot = {
+      players: JSON.parse(JSON.stringify(players)),
+      currentPlayerIndex,
+      round,
+      dice: [...dice],
+      held: [...held],
+      rollsLeft,
+      physicalDice: [...physicalDice],
+      mode,
+      actionDescription: `${targetPlayer.name}: modificado ${catName} (${oldScore} → ${newScore} pts)`,
+    };
+    setUndoStack((prev) => [...prev, snapshot]);
+
+    const beforeTotals = calculatePlayerTotals(targetPlayer.scores);
+    const updatedScores = { ...targetPlayer.scores, [category]: newScore };
+    const afterTotals = calculatePlayerTotals(updatedScores);
+
+    if (category === 'yatzy' && newScore === 50) {
+      sound.playYatzyFanfare();
+    } else {
+      sound.playScoreRecorded();
+    }
+
+    if (beforeTotals.upperBonus === 0 && afterTotals.upperBonus > 0) {
+      sound.playBonus();
+    }
+
+    const updatedPlayers = players.map((p) =>
+      p.id === playerId ? { ...p, scores: updatedScores } : p
+    );
+    setPlayers(updatedPlayers);
+    setUndoToastMessage(`Puntuación modificada: ${catName} = ${newScore} pts`);
+    setTimeout(() => setUndoToastMessage(null), 3500);
+  };
+
+  const handleMoveScore = (
+    playerId: string,
+    fromCategory: Category,
+    toCategory: Category,
+    newScore: number
+  ) => {
+    const targetPlayer = players.find((p) => p.id === playerId);
+    if (!targetPlayer) return;
+
+    const fromCatName = CATEGORIES.find((c) => c.id === fromCategory)?.name || fromCategory;
+    const toCatName = CATEGORIES.find((c) => c.id === toCategory)?.name || toCategory;
+
+    // Snapshot for UNDO
+    const snapshot: GameSnapshot = {
+      players: JSON.parse(JSON.stringify(players)),
+      currentPlayerIndex,
+      round,
+      dice: [...dice],
+      held: [...held],
+      rollsLeft,
+      physicalDice: [...physicalDice],
+      mode,
+      actionDescription: `${targetPlayer.name}: movido de ${fromCatName} a ${toCatName} (${newScore} pts)`,
+    };
+    setUndoStack((prev) => [...prev, snapshot]);
+
+    const beforeTotals = calculatePlayerTotals(targetPlayer.scores);
+    const updatedScores = { ...targetPlayer.scores };
+    delete updatedScores[fromCategory];
+    updatedScores[toCategory] = newScore;
+    const afterTotals = calculatePlayerTotals(updatedScores);
+
+    if (toCategory === 'yatzy' && newScore === 50) {
+      sound.playYatzyFanfare();
+    } else {
+      sound.playScoreRecorded();
+    }
+
+    if (beforeTotals.upperBonus === 0 && afterTotals.upperBonus > 0) {
+      sound.playBonus();
+    }
+
+    const updatedPlayers = players.map((p) =>
+      p.id === playerId ? { ...p, scores: updatedScores } : p
+    );
+    setPlayers(updatedPlayers);
+    setUndoToastMessage(`Movido a ${toCatName} (${newScore} pts)`);
+    setTimeout(() => setUndoToastMessage(null), 3500);
+  };
+
+  const handleDeleteScore = (playerId: string, category: Category) => {
+    const targetPlayer = players.find((p) => p.id === playerId);
+    if (!targetPlayer) return;
+
+    const catName = CATEGORIES.find((c) => c.id === category)?.name || category;
+    const oldScore = targetPlayer.scores[category] ?? 0;
+
+    // Snapshot for UNDO
+    const snapshot: GameSnapshot = {
+      players: JSON.parse(JSON.stringify(players)),
+      currentPlayerIndex,
+      round,
+      dice: [...dice],
+      held: [...held],
+      rollsLeft,
+      physicalDice: [...physicalDice],
+      mode,
+      actionDescription: `${targetPlayer.name}: borrada casilla ${catName} (${oldScore} pts)`,
+    };
+    setUndoStack((prev) => [...prev, snapshot]);
+
+    sound.playHoldToggle(false);
+    const updatedScores = { ...targetPlayer.scores };
+    delete updatedScores[category];
+
+    const updatedPlayers = players.map((p) =>
+      p.id === playerId ? { ...p, scores: updatedScores } : p
+    );
+    setPlayers(updatedPlayers);
+    setUndoToastMessage(`Casilla ${catName} vaciada`);
+    setTimeout(() => setUndoToastMessage(null), 3500);
   };
 
   // UNDO LAST ACTION
@@ -411,6 +549,7 @@ export default function App() {
     setShowGameOverModal(false);
     setSelectedCategory(null);
     setSelectedPhysicalCategory(null);
+    setEditingScoreInfo(null);
 
     sound.playHoldToggle(false);
     setUndoToastMessage(
@@ -435,10 +574,11 @@ export default function App() {
     setDice([1, 2, 3, 4, 5]);
     setHeld([false, false, false, false, false]);
     setRollsLeft(3);
-    setPhysicalDice([1, 2, 3, 4, 5]);
+    setPhysicalDice([null, null, null, null, null]);
     setUndoStack([]);
     setSelectedCategory(null);
     setSelectedPhysicalCategory(null);
+    setEditingScoreInfo(null);
     setShowSetupModal(false);
     setShowGameOverModal(false);
   };
@@ -457,10 +597,11 @@ export default function App() {
     setDice([1, 2, 3, 4, 5]);
     setHeld([false, false, false, false, false]);
     setRollsLeft(3);
-    setPhysicalDice([1, 2, 3, 4, 5]);
+    setPhysicalDice([null, null, null, null, null]);
     setUndoStack([]);
     setSelectedCategory(null);
     setSelectedPhysicalCategory(null);
+    setEditingScoreInfo(null);
     setShowGameOverModal(false);
   };
 
@@ -495,6 +636,7 @@ export default function App() {
       if (
         ['INPUT', 'SELECT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName) ||
         selectedPhysicalCategory !== null ||
+        editingScoreInfo !== null ||
         showSettingsModal ||
         showSetupModal ||
         showGameOverModal ||
@@ -536,6 +678,7 @@ export default function App() {
     showRulesModal,
     showHistoryModal,
     viewingCategoryInfo,
+    editingScoreInfo,
   ]);
 
   // Theme styling classes
@@ -558,6 +701,8 @@ export default function App() {
         historyCount={history.length}
         canUndo={undoStack.length > 0}
         onUndo={handleUndo}
+        isEditModeActive={isEditScoresMode}
+        onToggleEditMode={() => setIsEditScoresMode((prev) => !prev)}
         onOpenSettings={() => setShowSettingsModal(true)}
         onOpenRules={() => setShowRulesModal(true)}
         onOpenHistory={() => setShowHistoryModal(true)}
@@ -616,6 +761,10 @@ export default function App() {
                 smartRecommendations={smartRecommendations}
                 onSelectCategory={handleSelectScorecardCategory}
                 onOpenCategoryInfo={(cat) => setViewingCategoryInfo(cat)}
+                isEditModeActive={isEditScoresMode}
+                onEditScore={(player, cat, currentScore) =>
+                  setEditingScoreInfo({ player, category: cat, currentScore })
+                }
               />
             </div>
           </div>
@@ -674,6 +823,10 @@ export default function App() {
                   smartRecommendations={smartRecommendations}
                   onSelectCategory={handleSelectScorecardCategory}
                   onOpenCategoryInfo={(cat) => setViewingCategoryInfo(cat)}
+                  isEditModeActive={isEditScoresMode}
+                  onEditScore={(player, cat, currentScore) =>
+                    setEditingScoreInfo({ player, category: cat, currentScore })
+                  }
                 />
               </div>
             </div>
@@ -690,6 +843,18 @@ export default function App() {
         onUpdatePhysicalDice={setPhysicalDice}
         onClose={() => setSelectedPhysicalCategory(null)}
         onConfirmScore={handleConfirmPhysicalScore}
+      />
+
+      {/* Arbitrary Score Modification & Category Moving Modal */}
+      <EditScoreModal
+        isOpen={editingScoreInfo !== null}
+        player={editingScoreInfo?.player || null}
+        category={editingScoreInfo?.category || null}
+        currentScore={editingScoreInfo?.currentScore || 0}
+        onClose={() => setEditingScoreInfo(null)}
+        onSaveScore={handleSaveModifiedScore}
+        onMoveScore={handleMoveScore}
+        onDeleteScore={handleDeleteScore}
       />
 
       {/* Options & Settings Modal */}

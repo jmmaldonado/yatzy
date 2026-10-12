@@ -6,8 +6,8 @@ import { CATEGORIES, calculateCategoryScore, findBestCategory } from '../utils/y
 
 interface ScoringOptionsListProps {
   currentPlayer: Player;
-  dice: number[];
-  onScoreCategory: (category: Category, dice: number[]) => void;
+  dice: (number | null)[];
+  onScoreCategory: (category: Category, dice: (number | null)[]) => void;
   smartRecommendations: boolean;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
